@@ -1,0 +1,6 @@
+E:\ISEL\trabalhosISEL\6Semestre\SI2\Ado.Net Project\SI2App\SI2App\bin\Debug\SI2App.exe.config
+E:\ISEL\trabalhosISEL\6Semestre\SI2\Ado.Net Project\SI2App\SI2App\bin\Debug\SI2App.exe
+E:\ISEL\trabalhosISEL\6Semestre\SI2\Ado.Net Project\SI2App\SI2App\bin\Debug\SI2App.pdb
+E:\ISEL\trabalhosISEL\6Semestre\SI2\Ado.Net Project\SI2App\SI2App\obj\Debug\SI2App.csprojResolveAssemblyReference.cache
+E:\ISEL\trabalhosISEL\6Semestre\SI2\Ado.Net Project\SI2App\SI2App\obj\Debug\SI2App.exe
+E:\ISEL\trabalhosISEL\6Semestre\SI2\Ado.Net Project\SI2App\SI2App\obj\Debug\SI2App.pdb
