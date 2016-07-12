@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
-
+using System.Linq;
+using System.Text;
+using System.Xml;
 
 namespace SI2App
 {
@@ -13,6 +16,11 @@ namespace SI2App
             int userId = -1;
             int itemId = -1;
             float value = -1;
+            int bidId = -1;
+            Decimal credCard;
+            string address;
+            Decimal countryCode;
+            Decimal toCode, fromCode;
 
             Boolean terminator = true;
             string line;
@@ -35,18 +43,67 @@ namespace SI2App
                         switch (line)
                         {
                             case "1":
-                                itemId = Parameter.GetIntParameter("item Id");
-                                value = Parameter.GetFloatParameter("value");
-                                userId = Parameter.GetIntParameter("user Id");                        
-                                
+                                itemId = Parameter.GetIntParameter("Ttem Id");
+                                value = Parameter.GetFloatParameter("Value");
+                                userId = Parameter.GetIntParameter("User Id");                                                      
                                 dbLink = new SQLServerDbAO();
                                 dbLink.InsertBid(con, itemId, value, userId);
                                 break;
                             case "2":
+                                bidId = Parameter.GetIntParameter("Bid id");                         
+                                dbLink = new SQLServerDbAO();
+                                dbLink.RemoveBid(con, bidId);
+                                break;
+                            case "3":
+                                bidId = Parameter.GetIntParameter("Item id");
+                                userId = Parameter.GetIntParameter("User id");
+                                credCard = Parameter.GetDecimalParameter("Credit card");
+                                countryCode = Parameter.GetDecimalParameter("Country code");
+                                address = Parameter.GetStringParameter("Address");
+                                dbLink = new SQLServerDbAO();
+                                dbLink.ConcludeAuction(con, itemId, userId, credCard, countryCode, address);
+                                break;
+                            case "4":
+                                bidId = Parameter.GetIntParameter("Item id");
+                                userId = Parameter.GetIntParameter("User id");
+                                credCard = Parameter.GetDecimalParameter("Credit card");
+                                countryCode = Parameter.GetDecimalParameter("Country code");
+                                address = Parameter.GetStringParameter("Address");
+                                dbLink = new SQLServerDbAO();
+                                dbLink.BuyItemDirectSale(con, itemId, userId, credCard, countryCode, address);
+                                break;
+                            case "5":
+                                itemId = Parameter.GetIntParameter("Item id");
+                                dbLink = new SQLServerDbAO();
+                                float price = dbLink.GetItemBiddingPrice(con, itemId);
+                                Console.WriteLine("Price = " + price);
+                                break;
+                            case "6":
+                                int n = Parameter.GetIntParameter("Number of bids");
+                                dbLink = new SQLServerDbAO();
+                                ConsoleFormatBidPrint(dbLink.LastNBids(con, n));
+                                break;
+                            case "7":
+                                toCode = Parameter.GetDecimalParameter("to location code");
+                                fromCode = Parameter.GetDecimalParameter("from location code");
+                                dbLink = new SQLServerDbAO();
+                                double shipPrice = dbLink.GetShippingPrice(con, toCode, fromCode);
+                                Console.WriteLine("Price = " + shipPrice);
+                                break;
+                            case "8":
+                                dbLink = new SQLServerDbAO();
+                                ConsoleFormatAuctionPrint(dbLink.NotConcludedAuction(con));
+                                break;
+                            case "9":
                                 userId = Parameter.GetIntParameter("user Id");
                                 string pw = Parameter.GetStringParameter("password ");
                                 dbLink = new SQLServerDbAO();
                                 dbLink.CheckPassword(con, userId, pw);
+                                break;
+                            case "10":
+                                itemId = Parameter.GetIntParameter("item id");
+                                string fileName = Parameter.GetStringParameter("file name");
+                                GetNotConcludedAuctionInfo(con, itemId, fileName);
                                 break;
                             case "end":
                                 Console.WriteLine("\nTerminating application");
@@ -73,39 +130,72 @@ namespace SI2App
 
             
         }
-
+        
         private static void Help()
         {
             Console.WriteLine("Type '1' to InsertBid - [itemId, value, userId]");
-            Console.WriteLine("Type '2' to CheckPassword - [userId, password]");
+            Console.WriteLine("Type '2' to RemoveBid - [bidId]");
+            Console.WriteLine("Type '3' to Conclude Auction - [itemId, userId, credCard, countryCode, adress ]");
+            Console.WriteLine("Type '4' to Buy Item Direct Sale - [itemId, userId, credCard, countryCode, adress ]");
+            Console.WriteLine("Type '5' to Get Item Bidding Price - [itemId]");
+            Console.WriteLine("Type '6' to Get last N bids - [N]");
+            Console.WriteLine("Type '7' to Get shipping price between 2 locations - [toCode, fromCode]");
+            Console.WriteLine("Type '8' to Get not concluded Auctions - []");
+            Console.WriteLine("Type '9' to CheckPassword - [userId, password]");
+            Console.WriteLine("Type '10' to Get cloced auction info - [itemId, fileName]");
             Console.WriteLine("Type 'end' to terminate app");
         }
 
-        /*
-        private void bla()
+
+        private static void ConsoleFormatAuctionPrint(IEnumerable<Auction> l)
+        {
+            if (!l.Any())
+            {
+                Console.WriteLine("No results to print");
+            }
+            foreach (Auction b in l)
+            {
+                Console.WriteLine("Auction: " + b.itemId + " | "
+                    + b.saleDesc + " | "
+                    + b.minBid + " | "
+                    + b.date + " | "
+                    + b.endDate
+                    );
+            }
+
+        }
+
+        private static void ConsoleFormatBidPrint(IEnumerable<Bid> l)
+        {
+            if (!l.Any())
+            {
+                Console.WriteLine("No results to print");
+            }
+
+            foreach (Bid b in l)
+            {
+                Console.WriteLine("Bid: " + b.bidId + " | " 
+                    + b.bidItemId + " | "
+                    + b.bidValue + " | "
+                    + b.bidDate + " | "
+                    + b.bidAlive 
+                    );
+            }
+        }
+
+
+
+        private static void GetNotConcludedAuctionInfo(int itemId, string fileName)
         {
 
-            using (SqlConnection con = new SqlConnection())
-            {
-                con.ConnectionString = "Database=SI2_Tests;Data Source=localhost;Integrated Security=SSPI";
-                con.Open();
-                Console.WriteLine(con.State.ToString());
-                SqlCommand cmd = con.CreateCommand();
-                cmd.CommandText = "select * from Person";
-                using (SqlDataReader dr = cmd.ExecuteReader())
-                {
-                    while (dr.Read())
-                    {
-                        Console.Write(dr.GetInt32(0) + " ");
-                        Console.Write(dr.GetString(1) + " ");
-                        Console.Write(dr.GetInt32(2) + " ");
+            XmlTextWriter writer = new XmlTextWriter(fileName, new UTF8Encoding());
+            writer.Formatting = Formatting.Indented;
+           // new SQLServerDbAO().
+            writer.WriteStartDocument();
 
-                    }
-                }
-            }
-            Console.WriteLine();
+
         }
-        */
+
     }
    
 

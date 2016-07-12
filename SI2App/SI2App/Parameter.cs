@@ -51,5 +51,22 @@ namespace SI2App
             return num;
         }
 
+
+
+        public static decimal GetDecimalParameter(string msg)
+        {
+            Console.WriteLine(msg);
+            string line = Console.ReadLine();
+            Decimal num;
+            bool parsed = Decimal.TryParse(line, out num);
+            if (!parsed)
+            {
+                // todo throw exception
+                Console.WriteLine("Decimal.TryParse could not parse '{0}' to an Decimal.\n", line);
+                return -1;
+            }
+            return num;
+        }
+
     }
 }

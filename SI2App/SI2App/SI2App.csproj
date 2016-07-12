@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Auction.cs" />
+    <Compile Include="Bid.cs" />
     <Compile Include="IDbAO.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="Program.cs" />
