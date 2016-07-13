@@ -425,9 +425,68 @@ as
 	commit
 go
 
+if OBJECT_ID('LastNBids') IS NOT NULL
+	drop proc dbo.LastNBids
+go
+create proc LastNBids @n int
+as	
+	select top (@n) bidId, bidItemId, bidDate, bidValue, bidAlive from dbo.Bid where bidAlive = 1 order by(bidDate) DESC
+go
 
 
+if OBJECT_ID('NotConcludedAuction') IS NOT NULL
+	drop proc dbo.NotConcludedAuction
+go
+create proc NotConcludedAuction
+as
+	select  itemSaleTypeItemId, itemSaleTypeDesc, auctionMinimumBid, itemSaleTypeDate, itemEndDate  
+	from dbo.ItemSaleType INNER JOIN dbo.Item on(itemSaleTypeItemId = itemId) 
+	where itemSaleTypeDesc = 'Auction' AND itemEndDate >= GETDATE()	
+go
 
+
+if OBJECT_ID('BidsInfoFromConcludedAuction') IS NOT NULL
+	drop proc dbo.BidsInfoFromConcludedAuction
+go
+create proc BidsInfoFromConcludedAuction @iId int
+as
+	if(exists( select * from dbo.Item where itemId = @iId))
+	begin
+		if(exists( select * from dbo.ItemSaleType where itemSaleTypeItemId = @iId AND itemSaleTypeDesc = 'Auction'))
+		begin
+			select bidUserId, bidDate
+			from dbo.Bid
+			where bidItemId = @iId
+			order by bidDate ASC
+		end
+		else
+		 raiserror('This item was not sold by auction', 16, 16, 1)
+	end
+	else
+	 raiserror('No such item with that id', 16, 16, 1)
+
+go
+
+
+if OBJECT_ID('AuctionInfoFromConcludedAuction') IS NOT NULL
+	drop proc dbo.AuctionInfoFromConcludedAuction
+go
+create proc AuctionInfoFromConcludedAuction @iId int
+as
+	if(exists( select * from dbo.Item where itemId = @iId))
+	begin
+		if(exists( select * from dbo.ItemSaleType where itemSaleTypeItemId = @iId AND itemSaleTypeDesc = 'Auction'))
+		begin
+			select itemSaleTypeId, auctionMinimumBid, itemSaleTypeDate, itemValue
+			from dbo.ItemSaleType Inner join dbo.Item on (itemId = itemSaleTypeItemId)
+			where itemSaleTypeItemId = @iId
+		end
+		else
+		 raiserror('This item was not sold by auction', 16, 16, 1)
+	end
+	else
+	 raiserror('No such item with that id', 16, 16, 1)
+go
 
 
 if OBJECT_ID('dropAllTables') IS NOT NULL
