@@ -43,14 +43,14 @@ namespace SI2App
                         switch (line)
                         {
                             case "1":
-                                itemId = Parameter.GetIntParameter("Ttem Id");
+                                itemId = Parameter.GetIntParameter("Item Id");
                                 value = Parameter.GetFloatParameter("Value");
-                                userId = Parameter.GetIntParameter("User Id");                                                      
+                                userId = Parameter.GetIntParameter("User Id");
                                 dbLink = new SQLServerDbAO();
                                 dbLink.InsertBid(con, itemId, value, userId);
                                 break;
                             case "2":
-                                bidId = Parameter.GetIntParameter("Bid id");                         
+                                bidId = Parameter.GetIntParameter("Bid id");
                                 dbLink = new SQLServerDbAO();
                                 dbLink.RemoveBid(con, bidId);
                                 break;
@@ -125,12 +125,12 @@ namespace SI2App
                 }
 
             }
-                Console.WriteLine("Press 'Enter' to exit");
-                Console.ReadLine();
+            Console.WriteLine("Press 'Enter' to exit");
+            Console.ReadLine();
 
-            
+
         }
-        
+
         private static void Help()
         {
             Console.WriteLine("Type '1' to InsertBid - [itemId, value, userId]");
@@ -174,30 +174,73 @@ namespace SI2App
 
             foreach (Bid b in l)
             {
-                Console.WriteLine("Bid: " + b.bidId + " | " 
+                Console.WriteLine("Bid: " + b.bidId + " | "
                     + b.bidItemId + " | "
                     + b.bidValue + " | "
                     + b.bidDate + " | "
-                    + b.bidAlive 
+                    + b.bidAlive
                     );
             }
         }
 
-
-
-        private static void GetNotConcludedAuctionInfo(int itemId, string fileName)
+        private static void GetNotConcludedAuctionInfo(SqlConnection con, int itemId, string fileName)
         {
-
             XmlTextWriter writer = new XmlTextWriter(fileName, new UTF8Encoding());
             writer.Formatting = Formatting.Indented;
-           // new SQLServerDbAO().
+            ExportBidsFromAuction auction = new ExportBidsFromAuction(con, itemId);
             writer.WriteStartDocument();
+            if (auction != null)
+            {
+                writer.WriteStartElement("auction");
+                writer.WriteAttributeString("id", auction.auctionInfo.id);
 
+                    writer.WriteStartElement("info");
+                        writer.WriteElementString("minimumBid", auction.auctionInfo.minimumBid);
+                        writer.WriteElementString("reservationPrice", auction.auctionInfo.reservationPrice);
+                        writer.WriteElementString("initialDate", auction.auctionInfo.initialDate);
+                    writer.WriteEndElement();
 
+                    if(auction.bids.Any())
+                    {
+                    writer.WriteStartElement("bids");
+                    foreach (Bid b in auction.bids)
+                        {
+                            writer.WriteStartElement("bid");
+                            writer.WriteAttributeString("num", b.num);
+                            writer.WriteAttributeString("userId", b.userId);
+                            writer.WriteAttributeString("datetime", b.dateTime);
+                        writer.WriteEndElement();
+                        }
+                    writer.WriteEndElement();               
+                    }
+                writer.WriteEndElement();
+            }
+            else
+            {
+                Console.WriteLine("File created is empty"); 
+            }
+            writer.WriteEndDocument();
+            writer.Flush();
+            writer.Close();
         }
 
+        /*
+        <auction id="17"> 
+                        <info>
+                            <minimumBid>                    </minimumBid>
+                            <reservationPrice>             </>
+                            <initialDate>                   </>
+                        </info>
+                        <bids>
+                            <bid num="0" userId="12" datetime="24:65:24"> </bid>
+                            <bid num = "1" userId = "13" datetime = "24:65:24" > </bid>
+     
+                        </bids>
+                    </auction>     
+        */
+
     }
-   
+
 
 
 }
