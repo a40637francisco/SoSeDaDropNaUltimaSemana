@@ -13,5 +13,6 @@ namespace SI2App
         public int bidId { get; internal set; }
         public int bidItemId { get; internal set; }
         public double bidValue { get; internal set; }
+        public string bidUserId { get; internal set; }
     }
 }

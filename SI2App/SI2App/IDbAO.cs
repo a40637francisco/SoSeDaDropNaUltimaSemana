@@ -27,5 +27,8 @@ namespace SI2App
         IEnumerable<Auction> NotConcludedAuction(SqlConnection con);
 
         void CheckPassword(SqlConnection con, int userId, string pw);
+
+
+
     }
 }

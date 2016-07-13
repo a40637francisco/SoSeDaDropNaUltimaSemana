@@ -104,6 +104,7 @@ namespace SI2App
                                 itemId = Parameter.GetIntParameter("item id");
                                 string fileName = Parameter.GetStringParameter("file name");
                                 GetNotConcludedAuctionInfo(con, itemId, fileName);
+                                Console.WriteLine("Finished writing file");
                                 break;
                             case "end":
                                 Console.WriteLine("\nTerminating application");
@@ -187,8 +188,10 @@ namespace SI2App
         {
             XmlTextWriter writer = new XmlTextWriter(fileName, new UTF8Encoding());
             writer.Formatting = Formatting.Indented;
-            ExportBidsFromAuction auction = new ExportBidsFromAuction(con, itemId);
+            ExportBidsFromAuction auction =  new ExportBidsFromAuction(con, itemId);
             writer.WriteStartDocument();
+
+
             if (auction != null)
             {
                 writer.WriteStartElement("auction");
@@ -203,14 +206,14 @@ namespace SI2App
                     if(auction.bids.Any())
                     {
                     writer.WriteStartElement("bids");
+                    writer.WriteAttributeString("num", auction.bids.Count().ToString());
                     foreach (Bid b in auction.bids)
                         {
-                            writer.WriteStartElement("bid");
-                            writer.WriteAttributeString("num", b.num);
-                            writer.WriteAttributeString("userId", b.userId);
-                            writer.WriteAttributeString("datetime", b.dateTime);
-                        writer.WriteEndElement();
-                        }
+                            writer.WriteStartElement("bid");                          
+                            writer.WriteAttributeString("userId", b.bidUserId);
+                            writer.WriteAttributeString("datetime", b.bidDate.ToString());
+                            writer.WriteEndElement();
+                        }                   
                     writer.WriteEndElement();               
                     }
                 writer.WriteEndElement();
@@ -223,21 +226,6 @@ namespace SI2App
             writer.Flush();
             writer.Close();
         }
-
-        /*
-        <auction id="17"> 
-                        <info>
-                            <minimumBid>                    </minimumBid>
-                            <reservationPrice>             </>
-                            <initialDate>                   </>
-                        </info>
-                        <bids>
-                            <bid num="0" userId="12" datetime="24:65:24"> </bid>
-                            <bid num = "1" userId = "13" datetime = "24:65:24" > </bid>
-     
-                        </bids>
-                    </auction>     
-        */
 
     }
 

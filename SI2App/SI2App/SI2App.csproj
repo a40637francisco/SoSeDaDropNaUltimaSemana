@@ -44,7 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Auction.cs" />
+    <Compile Include="AuctionInfo.cs" />
     <Compile Include="Bid.cs" />
+    <Compile Include="ExportBidsFromAuction.cs" />
     <Compile Include="IDbAO.cs" />
     <Compile Include="Parameter.cs" />
     <Compile Include="Program.cs" />
