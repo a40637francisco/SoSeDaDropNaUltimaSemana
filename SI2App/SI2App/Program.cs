@@ -75,7 +75,7 @@ namespace SI2App
                             case "5":
                                 itemId = Parameter.GetIntParameter("Item id");
                                 dbLink = new SQLServerDbAO();
-                                float price = dbLink.GetItemBiddingPrice(con, itemId);
+                                double price = dbLink.GetItemBiddingPrice(con, itemId);
                                 Console.WriteLine("Price = " + price);
                                 break;
                             case "6":

@@ -18,7 +18,7 @@ namespace SI2App
 
         void BuyItemDirectSale(SqlConnection con, int itemId, int userId, Decimal creadCard, Decimal countryCode, string address);
 
-        float GetItemBiddingPrice(SqlConnection con, int itemId);
+        double GetItemBiddingPrice(SqlConnection con, int itemId);
 
         IEnumerable<Bid> LastNBids(SqlConnection con, int numberOfBids);
 

@@ -85,7 +85,7 @@ namespace SI2App
             }
         }
 
-        public float GetItemBiddingPrice(SqlConnection con, int itemId)
+        public double GetItemBiddingPrice(SqlConnection con, int itemId)
         {
             using (SqlCommand cmd = con.CreateCommand())
             {
@@ -100,8 +100,7 @@ namespace SI2App
                 returnValue.Direction = ParameterDirection.ReturnValue;
 
                 cmd.ExecuteNonQuery();
-                return (float)returnValue.Value;
-
+                return (double)returnValue.Value;
             }
         }
 
@@ -155,7 +154,6 @@ namespace SI2App
 
         public double GetShippingPrice(SqlConnection con, Decimal toCode, Decimal fromCode)
         {
-
             using (SqlCommand cmd = con.CreateCommand())
             {
                 SqlParameter toCodeParam = new SqlParameter("@to", SqlDbType.Decimal);
