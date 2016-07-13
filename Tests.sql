@@ -33,18 +33,36 @@ exec dbo.insertBid 3, 200, 2
 
 exec dbo.removeBid 2
 
-print dbo.BiddingPrice(3)
+exec dbo.BiddingPrice 3
 
-select * from dbo.LastNBids(1)
+select * from dbo.LastNBidsFunc(1)
 
 exec dbo.concludeSale 1, 2, 1234123412341234, 620, 'Bela vista' 
 
-select * from NotConcludedAuction()
+select * from NotConcludedAuctionFunc()
 
 print dbo.checkPassword(1, 'qwerty')
 
 select * from dbo.Users
+select * from dbo.Country
+select * from dbo.Shipping
 select * from dbo.Location
+
+select * from dbo.Item
+select * from dbo.ItemSaleType
+select * from dbo.Sale
 select * from dbo.Bid
+
+
+exec BidsInfoFromConcludedAuction 3
+
+exec AuctionInfoFromConcludedAuction 3
+
+
+
+
+select itemSaleTypeId, auctionMinimumBid, itemSaleTypeDate, itemValue
+from dbo.ItemSaleType Inner join dbo.Item on (itemId = itemSaleTypeItemId)
+where itemSaleTypeItemId = 3
 
 

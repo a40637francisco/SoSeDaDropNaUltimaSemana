@@ -1,3 +1,4 @@
+use SI2
 
 if OBJECT_ID('MD5') IS NOT NULL
 	drop function dbo.MD5
@@ -28,6 +29,25 @@ begin
 end
 go
 
+if OBJECT_ID('CheckPassword_EF') IS NOT NULL
+	drop function dbo.CheckPassword_EF
+go
+create function CheckPassword_EF(@uId int, @pw varchar(255))
+returns @t table
+(
+	result bit not null
+)
+begin
+	Declare @aux varchar(4000)
+	Declare @curr varchar(4000)
+	set @aux = dbo.MD5(@pw)
+	select @curr = userPassword from dbo.Users where userId = @uId
+	if(@curr = @aux) insert into @t values(1)
+	insert into @t values(0)
+	return
+end
+go
+
 if OBJECT_ID('ShippingPrice') IS NOT NULL
 	drop function dbo.ShippingPrice
 go
@@ -38,6 +58,22 @@ begin
 	declare @p float
 	select @p = price from dbo.Shipping where dbo.Shipping.codeTo = @to AND dbo.Shipping.codeFrom = @from
 	return @p
+end
+go
+
+if OBJECT_ID('ShippingPrice_EF') IS NOT NULL
+	drop function dbo.ShippingPrice_EF
+go
+create function ShippingPrice_EF(@to numeric(3), @from numeric(3)) 
+returns @t table
+(
+	result float not null
+)
+begin
+	declare @p float
+	select @p = price from dbo.Shipping where dbo.Shipping.codeTo = @to AND dbo.Shipping.codeFrom = @from
+	insert into @t values(@p)
+	return
 end
 go
 
@@ -68,10 +104,47 @@ begin
 end
 go
 
-if OBJECT_ID('LastNBids') IS NOT NULL
-	drop function dbo.LastNBids
+if OBJECT_ID('BiddingPrice_EF') IS NOT NULL
+	drop function dbo.BiddingPrice_EF
 go
-create function LastNBids(@n int)
+create function BiddingPrice_EF(@iId int)
+returns @t table
+(
+	result float not null
+)
+begin
+	if((select count(*) from dbo.Item where itemId = @iId) = 0)
+	begin
+		insert into @t values(cast('Item does not exist' as float));
+		return
+	end
+	declare @lastBidValue float
+	select @lastBidValue =  MAX(bidValue) from dbo.Bid where bidItemId = @iId AND bidAlive = 1
+	if(@lastBidValue IS NULL)
+			begin
+				insert into @t values((select itemValue from dbo.Item where itemId = @iId)); 
+				return
+			end
+
+	else if((select count(*) from dbo.ItemSaleType where itemSaleTypeItemId = @iId AND itemSaleTypeDesc = 'Direct') > 0)
+		begin
+		 insert into @t values(cast('Item already sold' as int));
+		 return
+		end
+	else
+		insert into @t values((select auctionMinimumBid from dbo.ItemSaleType where itemSaleTypeItemId = @iId) + @lastBidValue);
+		return
+	 insert into @t values(cast('Error in BiddingPrice function' as int));
+	 return
+end
+go
+
+
+--It has stored Proc version to use in c#
+if OBJECT_ID('LastNBidsFunc') IS NOT NULL
+	drop function dbo.LastNBidsFunc
+go
+create function LastNBidsFunc(@n int)
 returns @t table
 (
 	bidId int not null,
@@ -86,10 +159,12 @@ begin
 end
 go
 
-if OBJECT_ID('NotConcludedAuction') IS NOT NULL
-	drop function dbo.NotConcludedAuction
+
+--It has stored Proc version to use in c#
+if OBJECT_ID('NotConcludedAuctionFunc') IS NOT NULL
+	drop function dbo.NotConcludedAuctionFunc
 go
-create function NotConcludedAuction()
+create function NotConcludedAuctionFunc()
 returns @t table
 (
 	itemSaleTypeItemId int not null,
